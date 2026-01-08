@@ -6,12 +6,16 @@ plugins {
 defaultTasks 'clean', 'build', 'publishToMavenLocal'
 
 ext.getGitHash = { ->
-	def stdout = new ByteArrayOutputStream()
-	exec {
-		commandLine 'git', 'rev-parse', '--short', 'HEAD'
-		standardOutput = stdout
-	}
-	return stdout.toString().trim()
+    try {
+        def stdout = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'rev-parse', '--short', 'HEAD'
+            standardOutput = stdout
+        }
+        return stdout.toString().trim()
+    } catch (Exception ignored) {
+        return "unknown"
+    }
 }
 
 // We embed the git hash into jar files, and also use it for the plugin version of snapshot builds.
@@ -24,27 +28,35 @@ println 'Build version: ' + buildVersion
 println 'Plugin version: ' + pluginVersion
 
 repositories {
-	mavenLocal()
-	mavenCentral()
+    mavenLocal()
+    mavenCentral()
 
-	// Bukkit/Spigot API
-	maven { url 'https://hub.spigotmc.org/nexus/content/groups/public/' }
-	// Shopkeepers API
-	maven { url 'https://raw.githubusercontent.com/Shopkeepers/Repository/main/releases/' }
-	// Shopkeepers API snapshots
-	//maven { url 'https://raw.githubusercontent.com/Shopkeepers/Repository/main/snapshots/' }
-	// Shopkeepers API Fallback
-	//maven { url 'https://jitpack.io' }
+    // Bukkit/Spigot API
+    maven { url 'https://hub.spigotmc.org/nexus/content/groups/public/' }
+
+    // Shopkeepers API
+    maven { url 'https://raw.githubusercontent.com/Shopkeepers/Repository/main/releases/' }
+
+    // Phoenix Dev (MMOItems & MythicLib)
+    maven { url 'https://nexus.phoenixdevt.fr/repository/maven-public/' }
+
+    maven { url 'https://mvn.lumine.io/repository/maven-public/' }
 }
 
 dependencies {
-	compileOnly 'org.spigotmc:spigot-api:1.21.1-R0.1-SNAPSHOT'
-	compileOnly 'com.nisovin.shopkeepers:ShopkeepersAPI:2.23.3'
-	// Fallback
-	//compileOnly 'com.github.Shopkeepers:Shopkeepers:master-SNAPSHOT'
+    // Spigot API
+    compileOnly 'org.spigotmc:spigot-api:1.21.1-R0.1-SNAPSHOT'
 
-	testImplementation 'org.spigotmc:spigot-api:1.21.1-R0.1-SNAPSHOT'
-	testImplementation 'junit:junit:4.13.1'
+    // Shopkeepers API
+    compileOnly 'com.nisovin.shopkeepers:ShopkeepersAPI:2.23.3'
+
+    // MMOItems & MythicLib
+    compileOnly 'io.lumine:MythicLib-dist:1.6.2-SNAPSHOT'
+    compileOnly 'net.Indyuce:MMOItems-API:6.9.5-SNAPSHOT'
+
+    // Testing
+    testImplementation 'org.spigotmc:spigot-api:1.21.1-R0.1-SNAPSHOT'
+    testImplementation 'junit:junit:4.13.1'
 }
 
 java
@@ -77,11 +89,12 @@ processResources {
 }
 
 jar {
-	manifest {
-		attributes 'Implementation-Title': "${project.group}:${project.name}",
-					'Implementation-Version': project.buildVersion
-		// Include versions of compile dependencies:
-		attributes configurations.compileClasspath.resolvedConfiguration.firstLevelModuleDependencies
-			.collectEntries{[it.moduleName, it.moduleVersion]}
-	}
+    manifest {
+        attributes 'Implementation-Title': "${project.group}:${project.name}",
+                'Implementation-Version': project.buildVersion
+
+        def deps = configurations.compileClasspath.resolvedConfiguration.firstLevelModuleDependencies
+                .collectEntries{[it.moduleName, it.moduleVersion]}
+        attributes deps
+    }
 }

@@ -1,3 +1,2 @@
-enable-ui-listener: true
-enable-trade-listener: true
 enable-item-updater: true
+debug: false # Enables display of updated items (their quantity, names)

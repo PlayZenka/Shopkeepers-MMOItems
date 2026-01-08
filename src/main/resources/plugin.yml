@@ -4,5 +4,5 @@ authors: [blablubbabc]
 website: '${dboUrl}'
 description: '${description}'
 
-main: de.blablubbabc.shopkeepersAPISamples.ShopkeepersAPISamplesPlugin
-depend: [Shopkeepers]
+main: de.blablubbabc.shopkeepersAPIMMOItems.ShopkeepersAPIMMOItems
+depend: [Shopkeepers, MMOItems, MythicLib]
