@@ -3,6 +3,7 @@ version: '${pluginVersion}'
 authors: [blablubbabc]
 website: '${dboUrl}'
 description: '${description}'
+api-version: '1.21'
 
 main: de.blablubbabc.shopkeepersAPIMMOItems.ShopkeepersAPIMMOItems
 depend: [Shopkeepers, MMOItems, MythicLib]
